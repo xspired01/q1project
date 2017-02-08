@@ -25,15 +25,14 @@ formTag.addEventListener('submit', function(event) { //event listener to get use
     // asynchronous ajax method using settings as parameter to get data from fantasydata.net
     let getResponse = $.ajax(settings) //jQuery call to pull data with varible settings
         .done(function(response) {
-            console.log(response);
+            // console.log(response);
             let teamStats = getResponse['responseJSON'];
             let projectedWins = getTeamWins(teamStats, normalizeResponse);
-            console.log(projectedWins);
+            // console.log(projectedWins);
             let teamName = getTeamName(teamStats, normalizeResponse);
             let displayResults = updateTable(projectedWins, teamName);
 
-        }); // stop for .done function
-    // stop for let getResponse indent lines. that just annoys me.
+        });
     tableBody.innerHTML = ''; //clears table
 }) // end of addEventListener function
 
