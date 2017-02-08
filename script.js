@@ -6,9 +6,9 @@ let settings = {
     "url": "https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016",
     "method": "GET",
     "headers": {
-        "ocp-apim-subscription-key": "",
+        "ocp-apim-subscription-key": "764e9d4db7704785a669236d07701c24",
         "cache-control": "no-cache",
-        "postman-token": ""
+        "postman-token": "23c9385d-0beb-5b6c-09c8-67be488c4063"
     }
 }
 
@@ -16,12 +16,11 @@ let searchForm = document.getElementById("search");
 let formTag = document.getElementsByTagName('form')[0];
 let tableBody = document.getElementById("table");
 
-formTag.addEventListener('submit', function(event) { //event listener to get user input
+formTag.addEventListener('submit', function(event) {
     event.preventDefault();
     let userResponse = search.value.toLowerCase(); //gets team name, conver toLowerCase
     let normalizeResponse = modifyUserResponse(userResponse); //use lookUp object to convert to integer
     let clear = clearSearchField();
-    //=========== asynchronous code ========================//
     // asynchronous ajax method using settings as parameter to get data from fantasydata.net
     let getResponse = $.ajax(settings) //jQuery call to pull data with varible settings
         .done(function(response) {
@@ -38,7 +37,6 @@ formTag.addEventListener('submit', function(event) { //event listener to get use
 
 // convert user response with lookUp object to an integer
 function modifyUserResponse(userResponse) {
-    console.log(userResponse);
     var lookUp = {
         cardinals: 0,
         arizona: 0,
@@ -118,9 +116,9 @@ function seasonOutcome(projectedWins) {
         return outcome1;
     } else if (x >= 5 && x <= 7) {
         return outcome2;
-    } else if (x >= 8 && x < 9) {
+    } else if (x >= 8 && x <= 9) {
         return outcome3;
-    } else if (x >= 10 && x < 12) {
+    } else if (x >= 10 && x <= 12) {
         return outcome4;
     } else if (x >= 13) {
         return outcome5;
@@ -167,6 +165,12 @@ function updateTable(projectedWins, teamName) {
     tableBody.appendChild(selectRow2);
     tableBody.appendChild(selectRow3);
     tableBody.appendChild(selectRow4);
+}
+
+function showImage() {
+    let firstRow = document.getElementById("table").rows[0];
+    let x = firstRow.insertCell(-1);
+    x.innerHTML = "<img src='https://upload.wikimedia.org/wikipedia/en/c/c5/Atlanta_Falcons_logo.svg' alt='logo'>";
 }
 
 // reset search field
