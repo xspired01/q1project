@@ -14,11 +14,13 @@ let settings = {
 
 let searchForm = document.getElementById("search");
 let formTag = document.getElementsByTagName('form')[0];
+let tableBody = document.getElementById("table");
 
 formTag.addEventListener('submit', function(event) { //event listener to get user input
     event.preventDefault();
     let userResponse = search.value.toLowerCase(); //gets team name, conver toLowerCase
     let normalizeResponse = modifyUserResponse(userResponse); //use lookUp object to convert to integer
+    let clear = clearSearchField();
     //=========== asynchronous code ========================//
     // asynchronous ajax method using settings as parameter to get data from fantasydata.net
     let getResponse = $.ajax(settings) //jQuery call to pull data with varible settings
@@ -26,14 +28,17 @@ formTag.addEventListener('submit', function(event) { //event listener to get use
             console.log(response);
             let teamStats = getResponse['responseJSON'];
             let projectedWins = getTeamWins(teamStats, normalizeResponse);
+            console.log(projectedWins);
+            let teamName = getTeamName(teamStats, normalizeResponse);
+            let displayResults = updateTable(projectedWins, teamName);
 
         }); // stop for .done function
     // stop for let getResponse indent lines. that just annoys me.
+    tableBody.innerHTML = ''; //clears table
 }) // end of addEventListener function
 
-//=== convert user response with lookup object to an integer ===//
+// convert user response with lookUp object to an integer
 function modifyUserResponse(userResponse) {
-    console.log("In modifyUserResponse");
     console.log(userResponse);
     var lookUp = {
         cardinals: 0,
@@ -94,28 +99,84 @@ function modifyUserResponse(userResponse) {
 function getTeamWins(teamStats, normalizeResponse) {
     let pointsScored = teamStats[normalizeResponse]["Score"];
     let pointsScoredAgainst = teamStats[normalizeResponse]["OpponentScore"];
-    // console.log(pointsScored);
-    // console.log(pointsScoredAgainst);
     let homeTeamScores = Math.pow(pointsScored, 1 / 2.37);
-    // console.log(homeTeamScores);
     let awayTeamScores = Math.pow(pointsScoredAgainst, 1 / 2.37)
-    // console.log(awayTeamScores);
     let teamWinPercentage = (homeTeamScores / (homeTeamScores + awayTeamScores));
-    // console.log(teamWinPercentage);
     let projWins = Math.ceil(teamWinPercentage * 16);
     console.log('This is projected team wins: ' + projWins);
     return projWins;
 }
 
+//determine season outcome
+function seasonOutcome(projectedWins) {
+    let x = projectedWins;
+    let outcome1 = "One the Clock";
+    let outcome2 = "Mediocrity";
+    let outcome3 = "Wildcard Round of Playoffs";
+    let outcome4 = "Division Round of Playoffs";
+    let outcome5 = "Superbowl!";
+    if (x <= 4) {
+        return outcome1;
+    } else if (x >= 5 && x <= 7) {
+        return outcome2;
+    } else if (x >= 8 && x < 9) {
+        return outcome3;
+    } else if (x >= 10 && x < 12) {
+        return outcome4;
+    } else if (x >= 13) {
+        return outcome5;
+    }
+}
 
+//determine whether to buy tickets
+function buyTickets(projectedWins) {
+    let y = projectedWins;
+    let buyChoice1 = "No";
+    let buyChoice2 = "Yes";
+    if (y < 8) {
+        return buyChoice1;
+    } else return buyChoice2;
+}
 
-// append a table that will appear on the HTML page
-// $('#tr').append('<td>' + projected + '</div>')
+//getting team name from the data
+function getTeamName(teamStats, normalizeResponse) {
+    let name = teamStats[normalizeResponse]["TeamName"];
+    return name;
+}
 
-// reset team name search field
-// function clearSearchField() {
-//     document.getElementById("search").reset();
-// }
+//displays projected results to user using a table
+function updateTable(projectedWins, teamName) {
+    let selectRow = document.createElement('tr');
+    let selectRow2 = document.createElement('tr');
+    let selectRow3 = document.createElement('tr');
+    let selectRow4 = document.createElement('tr');
+    let showName = document.createElement('td');
+    let selectCell = document.createElement('td');
+    let showOutcome = document.createElement('td');
+    let showBuyChoice = document.createElement('td');
+    let purchase = buyTickets(projectedWins);
+    let playoffs = seasonOutcome(projectedWins);
+    showName.innerText = teamName;
+    selectCell.innerText = "The projected team wins for next season is: " + projectedWins; //refers to name in eventListener
+    showOutcome.innerText = "The projected season outcome is: " + playoffs;
+    showBuyChoice.innerText = "Should you buy tickets:  " + purchase;
+    selectRow.appendChild(showName);
+    selectRow2.appendChild(selectCell);
+    selectRow3.appendChild(showOutcome);
+    selectRow4.appendChild(showBuyChoice);
+    tableBody.appendChild(selectRow);
+    tableBody.appendChild(selectRow2);
+    tableBody.appendChild(selectRow3);
+    tableBody.appendChild(selectRow4);
+}
+
+// reset search field
+function clearSearchField() {
+    document.getElementById("inputForm").reset();
+}
+
+// document.body.style.backgroundImage = "url('images/logo1.jpeg')"
+// document.body.style.backgroundColor = "lightblue";
 
 //  for later, convert code to use fetch()
 // function getStats(){
