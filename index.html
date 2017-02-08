@@ -19,35 +19,29 @@
     <header>
         <h1>NFL Team Win Projector</h1></header>
     <nav>
-        <p>Navigation Here</p>
+        <p>Want to Predict the Future?</p>
     </nav>
 
     <main class="container">
         <div class="row">
             <!-- Form Field -->
-            <form>
+            <form id="inputForm"> <!--  -->
                 <div class="col offset-s2 s7">
                 <!-- needed for col offset-->
                    <div class="input-field">
-
-                     <input type="text" id="search" name="search" placeholder="Enter your team in format (team name w/first letter Capital) e.g. Raiders" required/>
-                      <!-- <input type="reset" value="reset">  -->
+                     <input type="text" id="search" name="search" placeholder="Enter your team by name e.g. Raiders"  required/>
+                      <!-- <input type="reset" >  -->
                    </div>
                  </div>
                  <div class="col s3">
                   <!--for placement -->
-                  <button class="btn-large waves-effect waves-light" type="submit" name="action" >
+                  <button class="btn-large waves-effect waves-light" type="submit" name="action">
                     <i class="material-icons right">search</i>
                     Search
                   </button>
+                  <!-- //onclick="clearSearchField() return false;" -->
                   <!-- REMINDER add onclick="clearFunction()" for afterwards-->
-                <!--  <select name="search" id="search" required>
-                    <option selected>Please Select Your Team</option>
-                    <option value="Cardinals">
-                    <option value="Falcons">
-                    <option value="Ravens">
-                  </select>
-                  <div class="button">
+                    <!-- <div class="button">
                     <button type="submit">Submit Team</button>
                   </div> -->
 
@@ -56,11 +50,8 @@
             <!-- end of form field -->
 
             <table class="bordered">
-              <thead>
-              </thead>
                 <tbody id="table">
-                  <tr>
-                  </tr>
+
                 </tbody>
             </table>
 
