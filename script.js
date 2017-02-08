@@ -5,7 +5,7 @@ let settings = {
     "crossDomain": true,
     "url": "https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016",
     "method": "GET",
-    "headers": {
+    "headers": { // var mykey = config.["ocp-apim-subscription-key"],
         "ocp-apim-subscription-key": "764e9d4db7704785a669236d07701c24",
         "cache-control": "no-cache",
         "postman-token": "23c9385d-0beb-5b6c-09c8-67be488c4063"
@@ -17,8 +17,12 @@ let formTag = document.getElementsByTagName('form')[0];
 let tableBody = document.getElementById("table");
 
 formTag.addEventListener('submit', function(event) {
+
     event.preventDefault();
+
     let userResponse = search.value.toLowerCase(); //gets team name, conver toLowerCase
+    // console.log('img src="https://en.wikipedia.org/wiki/Oakland_Raiders#/media/File:Oakland_Raiders.svg"');
+    console.log('<img src="https://en.wikipedia.org/wiki/Oakland_Raiders#/media/File:Oakland_Raiders.svg">');
     let normalizeResponse = modifyUserResponse(userResponse); //use lookUp object to convert to integer
     let clear = clearSearchField();
     // asynchronous ajax method using settings as parameter to get data from fantasydata.net
@@ -180,13 +184,3 @@ function clearSearchField() {
 
 // document.body.style.backgroundImage = "url('images/logo1.jpeg')"
 // document.body.style.backgroundColor = "lightblue";
-
-//  for later, convert code to use fetch()
-// function getStats(){
-//   let url = 'https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016' //team stats 2015 season
-//   return fetch(url)
-//   .then(function(response){
-//
-//   })
-// }
-// }

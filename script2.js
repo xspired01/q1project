@@ -1,107 +1,184 @@
+//using fetch instead of $.ajax()
+
 let teamStats = [];
+let url = `https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016`;
+let mykey1 = config.key1;
+let mykey2 = config.key2;
 
 let settings = {
     "async": true,
     "crossDomain": true,
-    "url": "https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016",
+    // "url": "https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016",
     "method": "GET",
     "headers": {
-        "ocp-apim-subscription-key": "",
+        "ocp-apim-subscription-key": mykey1,
         "cache-control": "no-cache",
-        "postman-token": ""
+        "postman-token": mykey2
     }
 }
 
 let searchForm = document.getElementById("search");
 let formTag = document.getElementsByTagName('form')[0];
-//event listener to get user input
+let tableBody = document.getElementById("table");
+
 formTag.addEventListener('submit', function(event) {
     event.preventDefault();
-    // console.log(formTag);
-    let userResponse = search.value; //gets team name
-    // console.log(userResponse);
-    modifyResponse(userResponse);
-    return userResponse;
+    let userResponse = search.value.toLowerCase(); //gets team name, conver toLowerCase
+    let normalizeResponse = modifyUserResponse(userResponse); //use lookUp object to convert to integer
+    let clear = clearSearchField();     //resets search field
+    let getResponse = fetch(url, settings)
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(jsonResponse) {
+            let teamStats = jsonResponse;
+            let projectedWins = getTeamWins(teamStats, normalizeResponse);
+            let teamName = getTeamName(teamStats, normalizeResponse);
+            let displayResults = updateTable(projectedWins, teamName);
 
+        })
+    tableBody.innerHTML = ''; //clears table
+}) // end of addEventListener function
 
-})
+// convert user response with lookUp object to an integer
+function modifyUserResponse(userResponse) {
+    var lookUp = {
+        cardinals: 0,
+        arizona: 0,
+        falcons: 1,
+        atlanta: 1,
+        ravens: 2,
+        baltimore: 2,
+        bills: 3,
+        buffalo: 3,
+        panthers: 4,
+        bears: 5,
+        chicago: 5,
+        bengals: 6,
+        cincinnati: 6,
+        browns: 7,
+        cleveland: 7,
+        cowboys: 8,
+        dallas: 8,
+        broncos: 9,
+        denver: 9,
+        lions: 10,
+        detriot: 10,
+        packers: 11,
+        texans: 12,
+        colts: 13,
+        jaguars: 14,
+        chiefs: 15,
+        'kansas city': 15,
+        rams: 16,
+        'st. louis': 16,
+        dolphins: 17,
+        vikings: 18,
+        patriots: 19,
+        saints: 20,
+        giants: 21,
+        jets: 22,
+        raiders: 23,
+        oakland: 23,
+        eagles: 24,
+        steelers: 25,
+        pittsburgh: 25,
+        chargers: 26,
+        'san diego': 26,
+        seahawks: 27,
+        seattle: 27,
+        '49ers': 28,
+        49: 28,
+        'san francisco': 28,
+        buccaneers: 29,
+        titans: 30,
+        redskins: 31
+    };
+    return lookUp[userResponse];
+}
 
+//this function calculates team wins for next season
+function getTeamWins(teamStats, normalizeResponse) {
+    let pointsScored = teamStats[normalizeResponse]["Score"];
+    let pointsScoredAgainst = teamStats[normalizeResponse]["OpponentScore"];
+    let homeTeamScores = Math.pow(pointsScored, 1 / 2.37);
+    let awayTeamScores = Math.pow(pointsScoredAgainst, 1 / 2.37)
+    let teamWinPercentage = (homeTeamScores / (homeTeamScores + awayTeamScores));
+    let projWins = Math.ceil(teamWinPercentage * 16);
+    // console.log('This is projected team wins: ' + projWins);
+    return projWins;
+}
 
-// convert userResponse which is a string (team name)
-// to an integer for use in teamStats array
-function modifyResponse(userResponse) {
-    console.log("In modifyResponse function");
-    console.log(userResponse);
-    let modifiedUserResponse = 0;
-    if (userResponse === 'Cardinals') {
-        modifiedUserResponse = 0;
-    } else if (userResponse === 'Falcons') {
-        modifiedUserResponse = 1;
-    } else if (userResponse === 'Ravens') {
-        modifiedUserResponse = 2;
-    } else if (userResponse === 'Bills') {
-        modifiedUserResponse = 3;
+//determine season outcome
+function seasonOutcome(projectedWins) {
+    let x = projectedWins;
+    let outcome1 = "One the Clock";
+    let outcome2 = "Mediocrity";
+    let outcome3 = "Wildcard Round of Playoffs";
+    let outcome4 = "Division Round of Playoffs";
+    let outcome5 = "Superbowl!";
+    if (x <= 4) {
+        return outcome1;
+    } else if (x >= 5 && x <= 7) {
+        return outcome2;
+    } else if (x >= 8 && x <= 9) {
+        return outcome3;
+    } else if (x >= 10 && x <= 12) {
+        return outcome4;
+    } else if (x >= 13) {
+        return outcome5;
     }
-    console.log(modifiedUserResponse);
-    return modifiedUserResponse;
+}
+
+//determine whether to buy tickets
+function buyTickets(projectedWins) {
+    let y = projectedWins;
+    let buyChoice1 = "No";
+    let buyChoice2 = "Yes";
+    if (y < 8) {
+        return buyChoice1;
+    } else return buyChoice2;
+}
+
+//getting team name from the data
+function getTeamName(teamStats, normalizeResponse) {
+    let name = teamStats[normalizeResponse]["TeamName"];
+    // console.log(name);
+    return name;
+}
+
+//displays projected results to user using a table
+function updateTable(projectedWins, teamName) {
+    let selectRow = document.createElement('tr');
+    let selectRow2 = document.createElement('tr');
+    let selectRow3 = document.createElement('tr');
+    let selectRow4 = document.createElement('tr');
+    let showName = document.createElement('td');
+    let selectCell = document.createElement('td');
+    let showOutcome = document.createElement('td');
+    let showBuyChoice = document.createElement('td');
+    let purchase = buyTickets(projectedWins);
+    let playoffs = seasonOutcome(projectedWins);
+    showName.innerText = teamName;
+    selectCell.innerText = "The projected team wins for next season is: " + projectedWins; //refers to name in eventListener
+    showOutcome.innerText = "The projected season outcome is: " + playoffs;
+    showBuyChoice.innerText = "Should you buy tickets:  " + purchase;
+    selectRow.appendChild(showName);
+    selectRow2.appendChild(selectCell);
+    selectRow3.appendChild(showOutcome);
+    selectRow4.appendChild(showBuyChoice);
+    tableBody.appendChild(selectRow);
+    tableBody.appendChild(selectRow2);
+    tableBody.appendChild(selectRow3);
+    tableBody.appendChild(selectRow4);
 }
 
 
-//asynchronous ajax method using settings as parameter to get data from fantasydata.net
-let getResponse = $.ajax(settings) //jQuery call to pull data with varible settings
-    .done(function(response) {
-        // console.log(getResponse); //single object response NOT a promise object
-        // console.log(getResponse.responseJSON); //an array of 32 objects
-        teamStats = getResponse['responseJSON'];
-        console.log(teamStats);
-        let pointsScored = teamStats[modifiedUserResponse]["Score"];
-        let pointsScoredAgainst = teamStats[modifiedUserResponse]["OpponentScore"];
-        // console.log(pointsScored);
-        // console.log(pointsScoredAgainst);
-        let homeTeamScores = Math.pow(pointsScored, 1 / 2.37);
-        // console.log(homeTeamScores);
-        let awayTeamScores = Math.pow(pointsScoredAgainst, 1 / 2.37)
-        // console.log(awayTeamScores);
-        let teamWinPercentage = (homeTeamScores / (homeTeamScores + awayTeamScores));
-        // console.log(teamWinPercentage);
-        let projWins = (teamWinPercentage * 16).toFixed(2);
-        console.log('This is projected team wins: ' + projWins);
-        return projWins;
-        // teamWinCalculator(teamStats);
-        // console.log(teamWinCalculator(teamStats));
-    });
 
-// keep getting Uncaught Type Error: Cannot read property of 'Score' of undefined or 'modifiedUserResponse' of undefined
-// function teamWinCalculator(teamStats) {
-//     let pointsScored = teamStats[modifiedUserResponse]["Score"];
-//     let pointsScoredAgainst = teamStats[modifiedUserResponse]["OpponentScore"];
-//     // console.log(pointsScored);
-//     // console.log(pointsScoredAgainst);
-//     let homeTeamScores = Math.pow(pointsScored, 1 / 2.37);
-//     // console.log(homeTeamScores);
-//     let awayTeamScores = Math.pow(pointsScoredAgainst, 1 / 2.37)
-//     // console.log(awayTeamScores);
-//     let teamWinPercentage = (homeTeamScores / (homeTeamScores + awayTeamScores));
-//     // console.log(teamWinPercentage);
-//     let projWins = teamWinPercentage * 16;
-//     // console.log(projWins);
-//     return projWins;
-// }
+// reset search field
+function clearSearchField() {
+    document.getElementById("inputForm").reset();
+}
 
-
-
-// reset team name search field
-// function clearSearchField() {
-//     document.getElementById("search").reset();
-// }
-
-
-//  for later, convert code to use fetch()
-// function getStats(){
-//   let url = 'https://api.fantasydata.net/v3/nfl/scores/JSON/TeamSeasonStats/2016' //team stats 2015 season
-//   return fetch(url)
-//   .then(function(response){
-//
-//   })
-// }
-// }
+// document.body.style.backgroundImage = "url('images/logo1.jpeg')"
+// document.body.style.backgroundColor = "lightblue";
